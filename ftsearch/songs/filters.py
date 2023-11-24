@@ -2,6 +2,8 @@ from django.db.models import Q
 
 from django_filters import rest_framework as filters
 
+from django.contrib.postgres.search import SearchQuery
+
 from songs.models import Song
 
 
@@ -10,7 +12,6 @@ class SongFilter(filters.FilterSet):
 
     ititle = filters.CharFilter(field_name="title", lookup_expr="icontains")
     iartist = filters.CharFilter(field_name="artist", lookup_expr="icontains")
-    ifeatures = filters.CharFilter(field_name="title", lookup_expr="icontains")
     ilyrics = filters.CharFilter(field_name="title", lookup_expr="icontains")
 
     # Multifield filters
@@ -23,7 +24,6 @@ class SongFilter(filters.FilterSet):
         fields = (
             "title",
             "artist",
-            "features",
             "lyrics",
         )
 
@@ -34,12 +34,10 @@ class SongFilter(filters.FilterSet):
 
         # First approach to manual search
         for word in words:
-            search_filter |= Q(
+            search_filter &= Q(
                 title__icontains=word
             ) | Q(
                 artist__icontains=word
-            ) | Q(
-                features__icontains=word
             ) | Q(
                 lyrics__icontains=word
             )
@@ -48,10 +46,6 @@ class SongFilter(filters.FilterSet):
 
 
     def song_ftsearch_filter(self, queryset, name, value):
-        words = value.split() # Default separator is a whitespace " "
-
-        search_filter = Q()
-
         # Full text search using SearchVector
-
-        return queryset.filter(search_filter)
+        config = self.request.query_params.get("language", "english")
+        return queryset.filter(search_vector=SearchQuery(value, config=config, search_type="websearch"))

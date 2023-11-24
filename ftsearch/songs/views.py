@@ -17,7 +17,7 @@ query_logger = QueryLogger()
 
 
 class SongListView(generics.ListAPIView):
-    queryset = Song.objects.all().order_by("id")
+    queryset = Song.objects.all().order_by("-views")
     serializer_class = SongSerializer
     filterset_class = SongFilter
 
