@@ -34,5 +34,6 @@ class SongListView(generics.ListAPIView):
 
         # Log captured queries. The last is used to account for multiple requests
         file_logger.info(f'{query_params_text},{query_logger.queries[-1]["duration"]}')
+        console_logger.info(query_logger.queries[-1])
 
         return list_result
