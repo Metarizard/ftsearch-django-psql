@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 
 
 class Song(models.Model):
@@ -12,3 +14,9 @@ class Song(models.Model):
     language_cld3 = models.CharField(max_length=3)
     language_ft = models.CharField(max_length=3)
     language = models.CharField(max_length=3)
+    search_vector = SearchVectorField(null=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=["search_vector"], name="song_ftsearch_idx"),
+        ]
